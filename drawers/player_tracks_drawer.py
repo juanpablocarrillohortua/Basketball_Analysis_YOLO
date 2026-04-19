@@ -5,8 +5,9 @@ from .utils import draw_ellipse
 import torch
 
 class PlayerTracksDrawer:
-    def __init__(self):
-        pass
+    def __init__(self, color=(0, 0, 255), thickness=2):
+        self.color = color
+        self.thickness = thickness
 
     def draw(self, video_frames: list, tracks: list[dict]) -> list:
         output_video_frames = []
@@ -18,7 +19,7 @@ class PlayerTracksDrawer:
 
             # Draw player tracks
             for track_id, player in player_dict.items():
-                frame = draw_ellipse(frame, player["box"], color=(0, 0, 255), track_id=track_id)
+                frame = draw_ellipse(frame, player["box"], color=self.color, track_id=track_id)
 
 
             output_video_frames.append(frame)
