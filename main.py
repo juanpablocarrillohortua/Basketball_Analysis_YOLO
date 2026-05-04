@@ -2,6 +2,7 @@ from utils import read_video, save_video
 from trackers import PlayerTracker, BallTracker
 from drawers import PlayerTracksDrawer, BallTracksDrawer
 from team_assigner import TeamAssigner
+from ball_aquisition import BallAquisitionDetector
 
 def main():
     # read video
@@ -32,7 +33,7 @@ def main():
     # Interpolate missing detections
     ball_tracks = ball_tracker.interpolate_ball_positions(ball_tracks)
 
-    # Assign Player Teama
+    # Assign Player Team
     team_assigner = TeamAssigner(
         team_1_class_name='white basketball jersey',
         team_2_class_name='dark navy blue basketball jersey',
@@ -45,6 +46,13 @@ def main():
         stub_path="stubs/player_assignment_stub.pkl"
         )
 
+    #  Ball aquisition
+    ball_aquisition_detector = BallAquisitionDetector()
+    ball_aquisition = ball_aquisition_detector.detect_ball_possesion(
+        player_tracks,
+        ball_tracks
+    )
+
     # Draw player tracks
     player_tracks_drawer = PlayerTracksDrawer(
         team_1_color=(222, 250, 230),
@@ -52,7 +60,9 @@ def main():
         )
     video_frames_with_tracks = player_tracks_drawer.draw(video_frames,
                                                          player_tracks,
-                                                         player_assignment) #track the players and draw the bounding boxes
+                                                         player_assignment,
+                                                         ball_aquisition
+                                                         ) #track the players and draw the bounding boxes
 
     # Draw ball pointer
     ball_tracks_drawer = BallTracksDrawer()
