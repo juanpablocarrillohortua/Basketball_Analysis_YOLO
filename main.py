@@ -1,17 +1,25 @@
 from utils import read_video, save_video
 from trackers import PlayerTracker, BallTracker
-from drawers import PlayerTracksDrawer, BallTracksDrawer, TeamBallControlDrawer, PassInterceptionDrawer
+from drawers import (
+    PlayerTracksDrawer,
+    BallTracksDrawer,
+    TeamBallControlDrawer,
+    PassInterceptionDrawer,
+    CourtKeyPointsDrawer
+    )
 from team_assigner import TeamAssigner
 from ball_aquisition import BallAquisitionDetector
 from pass_and_interception_detector import PassAndInterceptionDetector
+from court_key_point_detector import CourtKeyPointDetector
 
 def main():
     # read video
-    video_frames = read_video("input_videos/video_3.mp4")
+    video_frames = read_video("input_videos/video_2.mp4")
 
     # initialize trackers
     player_tracker = PlayerTracker("models/player_detector_2.pt")
     ball_tracker = BallTracker("models/player_detector.pt")
+    court_key_point_detector = CourtKeyPointDetector("models/court_keypoint_detector.pt")
 
     # get player tracks
     player_tracks = player_tracker.get_object_tracks(
@@ -34,11 +42,19 @@ def main():
     # Interpolate missing detections
     ball_tracks = ball_tracker.interpolate_ball_positions(ball_tracks)
 
+    # get court key points
+    court_key_points = court_key_point_detector.get_court_key_points(
+        video_frames,
+        read_from_stub=False, # set it True for fast processing (without changes of logic, only draws)
+        stub_path="stubs/court_key_points_stubs.pkl"
+    )
+
+
     # Assign Player Team
     team_assigner = TeamAssigner(
         team_1_class_name='white shirt',
-        # team_2_class_name='dark blue shirt',
-        team_2_class_name='red shirt',
+        team_2_class_name='dark blue shirt',
+        # team_2_class_name='red shirt',
         )
 
     player_assignment = team_assigner.get_player_teams_accross_frames(
@@ -93,8 +109,15 @@ def main():
                                                         passes,
                                                         interceptions)
 
+    # Draw court key points
+    court_key_points_drawer = CourtKeyPointsDrawer()
+    video_frames_with_tracks = court_key_points_drawer.draw(
+        video_frames_with_tracks,
+        court_key_points
+        )
+
 
     # save video
-    save_video(video_frames_with_tracks, "output_videos/pass_and_interception_test_video_3.mp4")
+    save_video(video_frames_with_tracks, "output_videos/court_key_points_video.mp4")
 if __name__ == "__main__":
     main()
