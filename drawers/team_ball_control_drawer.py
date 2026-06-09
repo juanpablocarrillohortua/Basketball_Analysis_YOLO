@@ -48,12 +48,18 @@ class TeamBallControlDrawer:
 
         # --- Ball control logic (unchanged) ---
         team_ball_control_till_frame = team_ball_control[:frame_num + 1]
-        team_1_num_frames = team_ball_control_till_frame[team_ball_control_till_frame == 1].shape[0]
-        team_2_num_frames = team_ball_control_till_frame[team_ball_control_till_frame == 2].shape[0]
-        total_frames = team_ball_control_till_frame.shape[0]
+        frames_with_possession = team_ball_control_till_frame[team_ball_control_till_frame != -1]
+        total_possession_frames = frames_with_possession.shape[0]
+        if total_possession_frames > 0:
+            team_1_num_frames = frames_with_possession[frames_with_possession == 1].shape[0]
+            team_2_num_frames = frames_with_possession[frames_with_possession == 2].shape[0]
 
-        team_1 = (team_1_num_frames / total_frames) * 100
-        team_2 = (team_2_num_frames / total_frames) * 100
+            team_1 = (team_1_num_frames / total_possession_frames) * 100
+            team_2 = (team_2_num_frames / total_possession_frames) * 100
+        else:
+            # Porcentajes por defecto si aún no ha iniciado la posesión de ningún equipo
+            team_1 = 0.0
+            team_2 = 0.0
 
         lines = [
             f"Team 1",
